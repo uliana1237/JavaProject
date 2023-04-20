@@ -43,10 +43,14 @@ public class Task {
      * Вещественная система координат задачи
      */
     private final CoordinateSystem2d ownCS;
-//    /**
-//     * Список точек
-//     */
-//    private final ArrayList<Point> points;
+    /**
+     * Список треугольников
+     */
+    private final ArrayList<Triangle> triangles;
+    /**
+     * Список широких лучей
+     */
+    private final ArrayList<Beam> beams;
     /**
      * Размер точки
      */
@@ -82,9 +86,8 @@ public class Task {
     @JsonCreator
     public Task(@JsonProperty("ownCS") CoordinateSystem2d ownCS, @JsonProperty("points") ArrayList<Point> points) {
         this.ownCS = ownCS;
-//        this.points = points;
-//        this.crossed = new ArrayList<>();
-//        this.single = new ArrayList<>();
+        this.triangles = new ArrayList<>();
+        this.beams = new ArrayList<>();
     }
 
     /**
