@@ -72,29 +72,29 @@ public class PanelControl extends GridPanel {
         // задание
         task = new MultiLineLabel(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 0, 6, 2, Task.TASK_TEXT,
+                6, 8, 0, 0, 6, 2, Task.TASK_TEXT,
                 false, true);
         // добавление вручную
         Label xLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 2, 1, 1, "X", true, true);
+                6, 8, 0, 2, 1, 1, "X", true, true);
         labels.add(xLabel);
         Input xField = InputFactory.getInput(window, false, FIELD_BACKGROUND_COLOR, PANEL_PADDING,
-                6, 7, 1, 2, 2, 1, "0.0", true,
+                6, 8, 1, 2, 2, 1, "0.0", true,
                 FIELD_TEXT_COLOR, true);
         inputs.add(xField);
         Label yLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 2, 1, 1, "Y", true, true);
+                6, 8, 3, 2, 1, 1, "Y", true, true);
         labels.add(yLabel);
         Input yField = InputFactory.getInput(window, false, FIELD_BACKGROUND_COLOR, PANEL_PADDING,
-                6, 7, 4, 2, 2, 1, "0.0", true,
+                6, 8, 4, 2, 2, 1, "0.0", true,
                 FIELD_TEXT_COLOR, true);
         inputs.add(yField);
 
-        Button addToFirstSet = new Button(
+        Button addTriangle = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 3, 3, 1, "Добавить в первое\nмножество",
+                6, 8, 0, 3, 3, 1, "Добавить точку №1\nв треугольник",
                 true, true);
-        addToFirstSet.setOnClick(() -> {
+        addTriangle.setOnClick(() -> {
             // если числа введены верно
             if (!xField.hasValidDoubleValue()) {
                 PanelLog.warning("X координата введена неверно");
@@ -106,13 +106,13 @@ public class PanelControl extends GridPanel {
 //                );
             }
         });
-        buttons.add(addToFirstSet);
+        buttons.add(addTriangle);
 
-        Button addToSecondSet = new Button(
+        Button addBeam = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 3, 3, 1, "Добавить во второе\nмножество",
+                6, 8, 3, 3, 3, 1, "Добавить точку №2\nв широкий луч",
                 true, true);
-        addToSecondSet.setOnClick(() -> {
+        addBeam.setOnClick(() -> {
             // если числа введены верно
             if (!xField.hasValidDoubleValue()) {
                 PanelLog.warning("X координата введена неверно");
@@ -124,59 +124,74 @@ public class PanelControl extends GridPanel {
 //                );
             }
         });
-        buttons.add(addToSecondSet);
+        buttons.add(addBeam);
 
         // случайное добавление
         Label cntLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 4, 1, 1, "Кол-во", true, true);
+                6, 8, 0, 4, 1, 1, "Кол-во", true, true);
         labels.add(cntLabel);
 
         Input cntField = InputFactory.getInput(window, false, FIELD_BACKGROUND_COLOR, PANEL_PADDING,
-                6, 7, 1, 4, 2, 1, "5", true,
+                6, 8, 1, 4, 2, 1, "5", true,
                 FIELD_TEXT_COLOR, true);
         inputs.add(cntField);
 
-        Button addPoints = new Button(
+        Button addRandomTriangles = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 4, 3, 1, "Добавить\nслучайные точки",
+                6, 8, 0, 5, 3, 1, "Добавить\nслучайные треугольники",
                 true, true);
-        addPoints.setOnClick(() -> {
+        addRandomTriangles.setOnClick(() -> {
             // если числа введены верно
             if (!cntField.hasValidIntValue()) {
                 PanelLog.warning("кол-во точек указано неверно");
-            } else
-                PanelRendering.task.addRandomPoints(cntField.intValue());
+            } else {
+//                PanelRendering.task.addRandomPoints(cntField.intValue());
+            }
         });
-        buttons.add(addPoints);
+        buttons.add(addRandomTriangles);
+
+        Button addRandomBeam = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 8, 3, 5, 3, 1, "Добавить случайные\nширокие лучи",
+                true, true);
+        addRandomBeam.setOnClick(() -> {
+            // если числа введены верно
+            if (!cntField.hasValidIntValue()) {
+                PanelLog.warning("кол-во точек указано неверно");
+            } else {
+//                PanelRendering.task.addRandomPoints(cntField.intValue());
+            }
+        });
+        buttons.add(addRandomBeam);
 
         // управление
-        Button load = new Button(
-                window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 5, 3, 1, "Загрузить",
-                true, true);
-        load.setOnClick(() -> {
-            PanelRendering.load();
-            cancelTask();
-        });
-        buttons.add(load);
-
-        Button save = new Button(
-                window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 5, 3, 1, "Сохранить",
-                true, true);
-        save.setOnClick(PanelRendering::save);
-        buttons.add(save);
+//        Button load = new Button(
+//                window, false, backgroundColor, PANEL_PADDING,
+//                6, 8, 0, 6, 3, 1, "Загрузить",
+//                true, true);
+//        load.setOnClick(() -> {
+//            PanelRendering.load();
+//            cancelTask();
+//        });
+//        buttons.add(load);
+//
+//        Button save = new Button(
+//                window, false, backgroundColor, PANEL_PADDING,
+//                6, 8, 3, 6, 3, 1, "Сохранить",
+//                true, true);
+//        save.setOnClick(PanelRendering::save);
+//        buttons.add(save);
 
         Button clear = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 6, 3, 1, "Очистить",
+                6, 8, 0, 7, 3, 1, "Очистить",
                 true, true);
         clear.setOnClick(() -> PanelRendering.task.clear());
         buttons.add(clear);
 
         solve = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 6, 3, 1, "Решить",
+                6, 8, 3, 7, 3, 1, "Решить",
                 true, true);
 //        solve.setOnClick(() -> {
 //            if (!PanelRendering.task.isSolved()) {
