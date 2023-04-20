@@ -13,6 +13,8 @@ import misc.Vector2i;
 import panels.PanelLog;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static app.Colors.*;
@@ -63,10 +65,10 @@ public class Task {
      * Флаг, решена ли задача
      */
     private boolean solved;
-//    /**
-//     * Список точек в пересечении
-//     */
-//    private final ArrayList<Point> crossed;
+    /**
+     * Список точек в пересечении
+     */
+    private final ArrayList<Vector2d> crossed;
 //    /**
 //     * Список точек в разности
 //     */
@@ -88,6 +90,14 @@ public class Task {
         this.ownCS = ownCS;
         this.triangles = new ArrayList<>();
         this.beams = new ArrayList<>();
+        this.crossed = new ArrayList<>();
+
+        // вручную
+        triangles.add(new Triangle(new Vector2d(0, 0), new Vector2d(3, 0), new Vector2d(0, 3)));
+        beams.add(new Beam(new Vector2d(0, 6), new Vector2d(6, 0)));
+        crossed.add(new Vector2d(0, 0));
+        crossed.add(new Vector2d(-3, 0));
+        crossed.add(new Vector2d(-5, -6));
     }
 
     /**
@@ -115,23 +125,124 @@ public class Task {
         canvas.save();
         // создаём перо
         try (var paint = new Paint()) {
-//            for (Point p : points) {
-//                if (!solved) {
-//                    paint.setColor(p.getColor());
-//                } else {
-//                    if (crossed.contains(p))
-//                        paint.setColor(CROSSED_COLOR);
-//                    else
-//                        paint.setColor(SUBTRACTED_COLOR);
-//                }
-//                // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
-//                // а в классическом представлении - вверх
-//                Vector2i windowPos = windowCS.getCoords(p.pos.x, p.pos.y, ownCS);
-//                // рисуем точку
-//                canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
-//            }
+            for (Triangle t: triangles) {
+                if (t.peaks.size() < 3) {
+                    paint.setColor(POINT_COLOR);
+                    paintPoints(t.peaks, paint, windowCS, canvas);
+                } else {
+                    paint.setColor(Triangle.getColor());
+                    paintLines(t.peaks,true, paint, windowCS, canvas);
+                }
+            }
+            for (Beam b: beams) {
+                if (b.peaks.size() < 2){
+                    paint.setColor(POINT_COLOR);
+                    paintPoints(b.peaks, paint, windowCS, canvas);
+                } else {
+                    paint.setColor(Beam.getColor());
+                    Vector2d p1, p2, l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
+                    Vector2d n = new Vector2d(-l.y, l.x);
+
+                    Vector2d m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(0));
+                    if (m.x / n.x > m.y / n.y) {
+                        p1 = new Vector2d(m.y / n.y * n.x, m.y);
+                    } else {
+                        p1 = new Vector2d(m.x, m.x / n.x * n.y);
+                    }
+                    p1.add(b.peaks.get(0));
+
+                    m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(1));
+                    if (m.x / n.x > m.y / n.y) {
+                        p2 = new Vector2d(m.y / n.y * n.x, m.y);
+                    } else {
+                        p2 = new Vector2d(m.x, m.x / n.x * n.y);
+                    }
+                    p2.add(b.peaks.get(1));
+
+                    ArrayList<Vector2d> points = new ArrayList<>();
+                    points.add(p1);
+                    points.add(b.peaks.get(0));
+                    points.add(b.peaks.get(1));
+                    points.add(p2);
+                    paintLines(points, false, paint, windowCS, canvas);
+                }
+            }
+            if (!crossed.isEmpty()) {
+                paint.setColor(CROSSED_COLOR);
+                paintLines(crossed, true, paint, windowCS, canvas);
+                paint.setColor(Beam.getColor());
+            }
         }
         canvas.restore();
+    }
+
+    /**
+     * Рисует линии по списку вершин
+     *
+     * @param points   список вершин
+     * @param paint    перо
+     * @param windowCS СК окна
+     * @param canvas   Полотно
+     */
+
+    private void paintLines(ArrayList<Vector2d> points, Boolean isClosed, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
+        for (int i = 0; i + 1 < points.size(); ++i) {
+            paintLine(points.get(i), points.get(i + 1), paint, windowCS, canvas);
+        }
+        if (isClosed) {
+            paintLine(points.get(points.size()-1), points.get(0), paint, windowCS, canvas);
+        }
+    }
+
+    /**
+     * Рисует линию двум вершинам
+     *
+     * @param p1       вершина №1
+     * @param p2       вершина №2
+     * @param paint    перо
+     * @param windowCS СК окна
+     * @param canvas   Полотно
+     */
+
+    private void paintLine(Vector2d p1, Vector2d p2, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
+        // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
+        // а в классическом представлении - вверх
+        Vector2i windowPos1 = windowCS.getCoords(p1.x, -p1.y, ownCS);
+        Vector2i windowPos2 = windowCS.getCoords(p2.x, -p2.y, ownCS);
+        // рисуем точку
+        canvas.drawLine(windowPos1.x, windowPos1.y, windowPos2.x, windowPos2.y, paint);
+    }
+
+    /**
+     * Рисует точки
+     *
+     * @param points   список точек
+     * @param paint    перо
+     * @param windowCS СК окна
+     * @param canvas   Полотно
+     */
+
+    private void paintPoints(ArrayList<Vector2d> points, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
+        for (Vector2d p: points) {
+            paintPoint(p, paint, windowCS, canvas);
+        }
+    }
+
+    /**
+     * Рисует точку
+     *
+     * @param p        точка
+     * @param paint    перо
+     * @param windowCS СК окна
+     * @param canvas   Полотно
+     */
+
+    private void paintPoint(Vector2d p, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
+        // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
+        // а в классическом представлении - вверх
+        Vector2i windowPos = windowCS.getCoords(p.x, -p.y, ownCS);
+        // рисуем точку
+        canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
     }
 
 //    /**

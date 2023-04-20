@@ -29,8 +29,8 @@ public class Beam {
      *
      * @return цвет точки
      */
-    public int getColor() {
-        return Misc.getColor(0xCC, 0x00, 0x00, 0xFF);
+    public static int getColor() {
+        return Misc.getColor(0xCC, 0x00, 0xFF, 0x0);
     }
 
     /**

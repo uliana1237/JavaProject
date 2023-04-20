@@ -39,7 +39,7 @@ public class Triangle {
      *
      * @return цвет точки
      */
-    public int getColor() {
+    public static int getColor() {
         return Misc.getColor(0xCC, 0x00, 0x00, 0xFF);
     }
 
