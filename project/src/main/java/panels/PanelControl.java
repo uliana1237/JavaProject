@@ -101,16 +101,15 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-//                PanelRendering.task.addPoint(
-//                        new Vector2d(xField.doubleValue(), yField.doubleValue()), Point.PointSet.FIRST_SET
-//                );
+                PanelRendering.task.addPointTriangle(new Vector2d(xField.doubleValue(), yField.doubleValue()));
+                addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsTriangle.size() + 1);
             }
         });
         buttons.add(addTriangle);
 
         Button addBeam = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 8, 3, 3, 3, 1, "Добавить точку №2\nв широкий луч",
+                6, 8, 3, 3, 3, 1, "Добавить точку №1\nв широкий луч",
                 true, true);
         addBeam.setOnClick(() -> {
             // если числа введены верно
@@ -119,9 +118,8 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-//                PanelRendering.task.addPoint(
-//                        new Vector2d(xField.doubleValue(), yField.doubleValue()), Point.PointSet.SECOND_SET
-//                );
+                PanelRendering.task.addPointBeam(new Vector2d(xField.doubleValue(), yField.doubleValue()));
+                addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsBeam.size() + 1);
             }
         });
         buttons.add(addBeam);

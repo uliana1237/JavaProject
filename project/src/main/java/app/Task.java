@@ -13,9 +13,6 @@ import misc.Vector2i;
 import panels.PanelLog;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static app.Colors.*;
 
@@ -52,7 +49,7 @@ public class Task {
     /**
      * Список точек незаконченного треугольника
      */
-    private final ArrayList<Vector2d> pointsTringle;
+    public ArrayList<Vector2d> pointsTriangle;
     /**
      * Список широких лучей
      */
@@ -60,7 +57,7 @@ public class Task {
     /**
      * Список точек незаконченного широкого луча
      */
-    private final ArrayList<Vector2d> pointsBeam;
+    public ArrayList<Vector2d> pointsBeam;
     /**
      * Размер точки
      */
@@ -99,15 +96,15 @@ public class Task {
         this.triangles = new ArrayList<>();
         this.beams = new ArrayList<>();
         this.crossed = new ArrayList<>();
-        this.pointsTringle = new ArrayList<>();
+        this.pointsTriangle = new ArrayList<>();
         this.pointsBeam = new ArrayList<>();
 
         // вручную
-        triangles.add(new Triangle(new Vector2d(0, 0), new Vector2d(3, 0), new Vector2d(0, 3)));
-        beams.add(new Beam(new Vector2d(0, 6), new Vector2d(6, 0)));
-        crossed.add(new Vector2d(0, 0));
-        crossed.add(new Vector2d(-3, 0));
-        crossed.add(new Vector2d(-5, -6));
+//        triangles.add(new Triangle(new Vector2d(0, 0), new Vector2d(3, 0), new Vector2d(0, 3)));
+//        beams.add(new Beam(new Vector2d(0, 6), new Vector2d(6, 0)));
+//        crossed.add(new Vector2d(0, 0));
+//        crossed.add(new Vector2d(-3, 0));
+//        crossed.add(new Vector2d(-5, -6));
     }
 
     /**
@@ -135,47 +132,45 @@ public class Task {
         canvas.save();
         // создаём перо
         try (var paint = new Paint()) {
+            if (!pointsTriangle.isEmpty()) {
+                paint.setColor(POINTS_TRIANGLE);
+                paintPoints(pointsTriangle, paint, windowCS, canvas);
+            }
             for (Triangle t: triangles) {
-                if (t.peaks.size() < 3) {
-                    paint.setColor(POINTS_TRIANGLE);
-                    paintPoints(pointsTringle, paint, windowCS, canvas);
-                } else {
-                    paint.setColor(Triangle.getColor());
-                    paintLines(t.peaks,true, paint, windowCS, canvas);
-                }
+                paint.setColor(Triangle.getColor());
+                paintLines(t.peaks,true, paint, windowCS, canvas);
+            }
+            if (!pointsBeam.isEmpty()) {
+                paint.setColor(POINTS_BEAM);
+                paintPoints(pointsBeam, paint, windowCS, canvas);
             }
             for (Beam b: beams) {
-                if (b.peaks.size() < 2){
-                    paint.setColor(POINTS_BEAM);
-                    paintPoints(pointsBeam, paint, windowCS, canvas);
+                paint.setColor(Beam.getColor());
+                Vector2d p1, p2, l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
+                Vector2d n = new Vector2d(-l.y, l.x);
+
+                Vector2d m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(0));
+                if (m.x / n.x > m.y / n.y) {
+                    p1 = new Vector2d(m.y / n.y * n.x, m.y);
                 } else {
-                    paint.setColor(Beam.getColor());
-                    Vector2d p1, p2, l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
-                    Vector2d n = new Vector2d(-l.y, l.x);
-
-                    Vector2d m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(0));
-                    if (m.x / n.x > m.y / n.y) {
-                        p1 = new Vector2d(m.y / n.y * n.x, m.y);
-                    } else {
-                        p1 = new Vector2d(m.x, m.x / n.x * n.y);
-                    }
-                    p1.add(b.peaks.get(0));
-
-                    m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(1));
-                    if (m.x / n.x > m.y / n.y) {
-                        p2 = new Vector2d(m.y / n.y * n.x, m.y);
-                    } else {
-                        p2 = new Vector2d(m.x, m.x / n.x * n.y);
-                    }
-                    p2.add(b.peaks.get(1));
-
-                    ArrayList<Vector2d> points = new ArrayList<>();
-                    points.add(p1);
-                    points.add(b.peaks.get(0));
-                    points.add(b.peaks.get(1));
-                    points.add(p2);
-                    paintLines(points, false, paint, windowCS, canvas);
+                    p1 = new Vector2d(m.x, m.x / n.x * n.y);
                 }
+                p1.add(b.peaks.get(0));
+
+                m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(1));
+                if (m.x / n.x > m.y / n.y) {
+                    p2 = new Vector2d(m.y / n.y * n.x, m.y);
+                } else {
+                    p2 = new Vector2d(m.x, m.x / n.x * n.y);
+                }
+                p2.add(b.peaks.get(1));
+
+                ArrayList<Vector2d> points = new ArrayList<>();
+                points.add(p1);
+                points.add(b.peaks.get(0));
+                points.add(b.peaks.get(1));
+                points.add(p2);
+                paintLines(points, false, paint, windowCS, canvas);
             }
             if (!crossed.isEmpty()) {
                 paint.setColor(CROSSED_COLOR);
@@ -255,18 +250,41 @@ public class Task {
         canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
     }
 
-//    /**
-//     * Добавить точку
-//     *
-//     * @param pos      положение
-//     * @param pointSet множество
-//     */
-//    public void addPoint(Vector2d pos, Point.PointSet pointSet) {
-//        solved = false;
-//        Point newPoint = new Point(pos, pointSet);
-//        points.add(newPoint);
-//        PanelLog.info("точка " + newPoint + " добавлена в " + newPoint.getSetName());
-//    }
+    /**
+     * Добавить точку треугольника
+     *
+     * @param pos      положение
+     */
+    public void addPointTriangle(Vector2d pos) {
+        solved = false;
+        pointsTriangle.add(pos);
+        if (pointsTriangle.size() < 3) {
+            PanelLog.info("точка " + pos + " добавлена");
+        } else {
+            Triangle t = new Triangle(pointsTriangle.get(0), pointsTriangle.get(1), pointsTriangle.get(2));
+            triangles.add(t);
+            pointsTriangle.clear();
+            PanelLog.info("тругольник " + t.toString() + " добавлен");
+        }
+    }
+
+    /**
+     * Добавить точку широкого угла
+     *
+     * @param pos      положение
+     */
+    public void addPointBeam(Vector2d pos) {
+        solved = false;
+        pointsBeam.add(pos);
+        if (pointsBeam.size() < 2) {
+            PanelLog.info("точка " + pos + " добавлена");
+        } else {
+            Beam b = new Beam(pointsBeam.get(0), pointsBeam.get(1));
+            beams.add(b);
+            pointsBeam.clear();
+            PanelLog.info("широкоий луч " + b.toString() + " добавлен");
+        }
+    }
 
 
     /**
