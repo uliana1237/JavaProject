@@ -50,9 +50,17 @@ public class Task {
      */
     private final ArrayList<Triangle> triangles;
     /**
+     * Список точек незаконченного треугольника
+     */
+    private final ArrayList<Vector2d> pointsTringle;
+    /**
      * Список широких лучей
      */
     private final ArrayList<Beam> beams;
+    /**
+     * Список точек незаконченного широкого луча
+     */
+    private final ArrayList<Vector2d> pointsBeam;
     /**
      * Размер точки
      */
@@ -91,6 +99,8 @@ public class Task {
         this.triangles = new ArrayList<>();
         this.beams = new ArrayList<>();
         this.crossed = new ArrayList<>();
+        this.pointsTringle = new ArrayList<>();
+        this.pointsBeam = new ArrayList<>();
 
         // вручную
         triangles.add(new Triangle(new Vector2d(0, 0), new Vector2d(3, 0), new Vector2d(0, 3)));
@@ -127,8 +137,8 @@ public class Task {
         try (var paint = new Paint()) {
             for (Triangle t: triangles) {
                 if (t.peaks.size() < 3) {
-                    paint.setColor(POINT_COLOR);
-                    paintPoints(t.peaks, paint, windowCS, canvas);
+                    paint.setColor(POINTS_TRIANGLE);
+                    paintPoints(pointsTringle, paint, windowCS, canvas);
                 } else {
                     paint.setColor(Triangle.getColor());
                     paintLines(t.peaks,true, paint, windowCS, canvas);
@@ -136,8 +146,8 @@ public class Task {
             }
             for (Beam b: beams) {
                 if (b.peaks.size() < 2){
-                    paint.setColor(POINT_COLOR);
-                    paintPoints(b.peaks, paint, windowCS, canvas);
+                    paint.setColor(POINTS_BEAM);
+                    paintPoints(pointsBeam, paint, windowCS, canvas);
                 } else {
                     paint.setColor(Beam.getColor());
                     Vector2d p1, p2, l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
