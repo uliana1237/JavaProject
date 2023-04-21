@@ -101,7 +101,7 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-                PanelRendering.task.addPointTriangle(new Vector2d(xField.doubleValue(), yField.doubleValue()));
+                PanelRendering.task.addPointTriangle(new Vector2d(xField.doubleValue(), -yField.doubleValue()));
                 addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsTriangle.size() + 1);
             }
         });
@@ -118,7 +118,7 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-                PanelRendering.task.addPointBeam(new Vector2d(xField.doubleValue(), yField.doubleValue()));
+                PanelRendering.task.addPointBeam(new Vector2d(xField.doubleValue(), -yField.doubleValue()));
                 addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsBeam.size() + 1);
             }
         });
@@ -143,7 +143,7 @@ public class PanelControl extends GridPanel {
             if (!cntField.hasValidIntValue()) {
                 PanelLog.warning("кол-во точек указано неверно");
             } else {
-//                PanelRendering.task.addRandomPoints(cntField.intValue());
+                PanelRendering.task.addRandomTriangles(cntField.intValue());
             }
         });
         buttons.add(addRandomTriangles);
@@ -157,7 +157,7 @@ public class PanelControl extends GridPanel {
             if (!cntField.hasValidIntValue()) {
                 PanelLog.warning("кол-во точек указано неверно");
             } else {
-//                PanelRendering.task.addRandomPoints(cntField.intValue());
+                PanelRendering.task.addRandomBeams(cntField.intValue());
             }
         });
         buttons.add(addRandomBeam);

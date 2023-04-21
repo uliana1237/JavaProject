@@ -212,8 +212,8 @@ public class Task {
     private void paintLine(Vector2d p1, Vector2d p2, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
         // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
         // а в классическом представлении - вверх
-        Vector2i windowPos1 = windowCS.getCoords(p1.x, -p1.y, ownCS);
-        Vector2i windowPos2 = windowCS.getCoords(p2.x, -p2.y, ownCS);
+        Vector2i windowPos1 = windowCS.getCoords(p1.x, p1.y, ownCS);
+        Vector2i windowPos2 = windowCS.getCoords(p2.x, p2.y, ownCS);
         // рисуем точку
         canvas.drawLine(windowPos1.x, windowPos1.y, windowPos2.x, windowPos2.y, paint);
     }
@@ -245,7 +245,7 @@ public class Task {
     private void paintPoint(Vector2d p, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
         // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
         // а в классическом представлении - вверх
-        Vector2i windowPos = windowCS.getCoords(p.x, -p.y, ownCS);
+        Vector2i windowPos = windowCS.getCoords(p.x, p.y, ownCS);
         // рисуем точку
         canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
     }
@@ -294,36 +294,47 @@ public class Task {
      * @param mouseButton кнопка мыши
      */
     public void click(Vector2i pos, MouseButton mouseButton) {
-//        if (lastWindowCS == null) return;
-//        // получаем положение на экране
-//        Vector2d taskPos = ownCS.getCoords(pos, lastWindowCS);
-//        // если левая кнопка мыши, добавляем в первое множество
-//        if (mouseButton.equals(MouseButton.PRIMARY)) {
-//            addPoint(taskPos, Point.PointSet.FIRST_SET);
-//            // если правая, то во второе
-//        } else if (mouseButton.equals(MouseButton.SECONDARY)) {
-//            addPoint(taskPos, Point.PointSet.SECOND_SET);
-//        }
+        if (lastWindowCS == null) return;
+        // получаем положение на экране
+        Vector2d taskPos = ownCS.getCoords(pos, lastWindowCS);
+        // если левая кнопка мыши, добавляем треугольник
+        if (mouseButton.equals(MouseButton.PRIMARY)) {
+            addPointTriangle(taskPos);
+            // если правая, то широкий луч
+        } else if (mouseButton.equals(MouseButton.SECONDARY)) {
+            addPointBeam(taskPos);
+        }
     }
 
 
     /**
-     * Добавить случайные точки
+     * Добавить случайные треугольники
      *
-     * @param cnt кол-во случайных точек
+     * @param cnt кол-во случайных треугольников
      */
-    public void addRandomPoints(int cnt) {
-        CoordinateSystem2i addGrid = new CoordinateSystem2i(30, 30);
+    public void addRandomTriangles(int cnt) {
+        for (int i = 0; i < cnt; i++) {
+            for (int j = 0; j < 3; ++j) {
+                Vector2d pos = ownCS.getRandomCoords();
+                // сработает примерно в половине случаев
+                addPointTriangle(pos);
+            }
+        }
+    }
 
-//        for (int i = 0; i < cnt; i++) {
-//            Vector2i gridPos = addGrid.getRandomCoords();
-//            Vector2d pos = ownCS.getCoords(gridPos, addGrid);
-//            // сработает примерно в половине случаев
-//            if (ThreadLocalRandom.current().nextBoolean())
-//                addPoint(pos, Point.PointSet.FIRST_SET);
-//            else
-//                addPoint(pos, Point.PointSet.SECOND_SET);
-//        }
+    /**
+     * Добавить случайные широкие лучи
+     *
+     * @param cnt кол-во случайных широких лучей
+     */
+    public void addRandomBeams(int cnt) {
+        for (int i = 0; i < cnt; i++) {
+            for (int j = 0; j < 2; ++j) {
+                Vector2d pos = ownCS.getRandomCoords();
+                // сработает примерно в половине случаев
+                addPointBeam(pos);
+            }
+        }
     }
 
 
@@ -370,7 +381,11 @@ public class Task {
      * Очистить задачу
      */
     public void clear() {
-//        points.clear();
+        pointsTriangle.clear();
+        pointsBeam.clear();
+        triangles.clear();
+        beams.clear();
+        crossed.clear();
         solved = false;
     }
 
