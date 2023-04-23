@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Set;
 public class UnitTest {
     @Test
     public void testTriangle () {
-        Triangle triangle = new Triangle(new Vector2d(-2, -2), new Vector2d(0, 4), new Vector2d(2, -2));
+        Triangle triangle = new Triangle(new ArrayList<>(List.of(new Vector2d(-2, -2), new Vector2d(0, 4), new Vector2d(2, -2))));
         assert triangle.isInside(new Vector2d(0, 0));
         assert !triangle.isInside(new Vector2d(5, 0));
         assert !triangle.isInside(new Vector2d(-5, 0));
@@ -23,8 +24,8 @@ public class UnitTest {
     }
 
     @Test
-    public void testPrimitive() {
-        Beam beam = new Beam(new Vector2d(0, 2), new Vector2d(2, 0));
+    public void testBeam() {
+        Beam beam = new Beam(new ArrayList<>(List.of(new Vector2d(0, 2), new Vector2d(2, 0))));
         assert !beam.isInside(new Vector2d(1, 0));
         assert !beam.isInside(new Vector2d(0, 0));
         assert !beam.isInside(new Vector2d(-3, -3));
@@ -34,9 +35,32 @@ public class UnitTest {
         assert beam.isInside(new Vector2d(6, 5));
     }
 
-//    private static void test(ArrayList<Triangle> triangles, ArrayList<Beam> beams) {
-//        Task task = new Task(new CoordinateSystem2d(10, 10, 20, 20), triangles, beams);
-//        task.solve();
-//
-//    }
+    @Test
+    public void testSolve() {
+        ArrayList<Triangle> triangles = new ArrayList<>();
+        triangles.add(new Triangle(new ArrayList<>(List.of(
+                new Vector2d(-7, -5),
+                new Vector2d(-1, 1),
+                new Vector2d(6, 5)))));
+        triangles.add(new Triangle(new ArrayList<>(List.of(
+                new Vector2d(-5, 7),
+                new Vector2d(-2, 4),
+                new Vector2d(4, 9)
+        ))));
+
+        ArrayList<Beam> beams = new ArrayList<>();
+        beams.add(new Beam(new ArrayList<>(List.of(
+                new Vector2d(7, -1),
+                new Vector2d(-5, 6)
+        ))));
+        beams.add(new Beam(new ArrayList<>(List.of(
+                new Vector2d(1, -4),
+                new Vector2d(9, -9)
+        ))));
+
+        Task task = new Task(new CoordinateSystem2d(-10, -10, 10, 10), triangles, beams);
+        task.solve();
+
+        assert task.getIndexBeam() == 0 && task.getIndexTriangle() == 0;
+    }
 }

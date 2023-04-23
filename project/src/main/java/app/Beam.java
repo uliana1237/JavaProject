@@ -1,5 +1,7 @@
 package app;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import misc.Misc;
 import misc.Vector2d;
 
@@ -17,11 +19,11 @@ public class Beam {
 
     /**
      * Конструктор широкого луча
-     * @param p1 вершина №1
-     * @param p2 вершина №2
+     * @param peaks вершины
      */
-    public Beam(Vector2d p1, Vector2d p2) {
-        this.peaks = new ArrayList<Vector2d>(List.of(new Vector2d[]{p1, p2}));
+    @JsonCreator
+    public Beam(@JsonProperty("peaks") ArrayList<Vector2d> peaks) {
+        this.peaks = peaks;
     }
 
     /**

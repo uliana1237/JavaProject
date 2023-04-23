@@ -167,22 +167,22 @@ public class PanelControl extends GridPanel {
         buttons.add(addRandomBeam);
 
         // управление
-//        Button load = new Button(
-//                window, false, backgroundColor, PANEL_PADDING,
-//                6, 8, 0, 6, 3, 1, "Загрузить",
-//                true, true);
-//        load.setOnClick(() -> {
-//            PanelRendering.load();
-//            cancelTask();
-//        });
-//        buttons.add(load);
-//
-//        Button save = new Button(
-//                window, false, backgroundColor, PANEL_PADDING,
-//                6, 8, 3, 6, 3, 1, "Сохранить",
-//                true, true);
-//        save.setOnClick(PanelRendering::save);
-//        buttons.add(save);
+        Button load = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 8, 0, 6, 3, 1, "Загрузить",
+                true, true);
+        load.setOnClick(() -> {
+            PanelRendering.load();
+            cancelTask();
+        });
+        buttons.add(load);
+
+        Button save = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 8, 3, 6, 3, 1, "Сохранить",
+                true, true);
+        save.setOnClick(PanelRendering::save);
+        buttons.add(save);
 
         Button clear = new Button(
                 window, false, backgroundColor, PANEL_PADDING,

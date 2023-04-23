@@ -1,6 +1,8 @@
 package app;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import misc.Misc;
 import misc.Vector2d;
 
@@ -23,15 +25,25 @@ public class Triangle {
 
     /**
      * Конструктор треугольника
+     * @param peaks вершины
+     */
+    @JsonCreator
+    public Triangle(@JsonProperty("peaks") ArrayList<Vector2d> peaks) {
+        this.peaks = peaks;
+        this.S = getSquareBy3Points(peaks.get(0), peaks.get(1), peaks.get(2));
+    }
+
+    /**
+     * Получить площадь триугольника по вершинам
      * @param p1 вершина №1
      * @param p2 вершина №2
      * @param p3 вершина №3
+     * @return Площадь
      */
-    public Triangle(Vector2d p1, Vector2d p2, Vector2d p3) {
-        this.peaks = new ArrayList<Vector2d>(List.of(new Vector2d[]{p1, p2, p3}));
+    double getSquareBy3Points(Vector2d p1, Vector2d p2, Vector2d p3) {
         Vector2d v1 = Vector2d.subtract(p2, p1);
         Vector2d v2 = Vector2d.subtract(p3, p1);
-        this.S = (Math.abs(v1.x * v2.y - v1.y * v2.x)) / 2;
+        return (Math.abs(v1.x * v2.y - v1.y * v2.x)) / 2;
     }
 
     /**
@@ -65,8 +77,8 @@ public class Triangle {
      */
 
     public boolean isInside(Vector2d point) {
-        return this.S == (new Triangle(peaks.get(0), peaks.get(1), point).S) +
-                        (new Triangle(peaks.get(1), peaks.get(2), point).S) +
-                        (new Triangle(peaks.get(0), peaks.get(2), point).S);
+        return this.S == getSquareBy3Points(point, peaks.get(0), peaks.get(1)) +
+                getSquareBy3Points(point, peaks.get(0), peaks.get(2)) +
+                getSquareBy3Points(point, peaks.get(1), peaks.get(2));
     }
 }

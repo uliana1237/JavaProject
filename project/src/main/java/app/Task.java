@@ -11,6 +11,7 @@ import misc.Vector2i;
 import panels.PanelLog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static app.Colors.*;
 
@@ -39,6 +40,7 @@ public class Task {
     /**
      * Вещественная система координат задачи
      */
+    @Getter
     private final CoordinateSystem2d ownCS;
     /**
      * Список треугольников
@@ -48,6 +50,7 @@ public class Task {
     /**
      * Список точек незаконченного треугольника
      */
+    @JsonIgnore
     public ArrayList<Vector2d> pointsTriangle;
     /**
      * Список широких лучей
@@ -57,6 +60,7 @@ public class Task {
     /**
      * Список точек незаконченного широкого луча
      */
+    @JsonIgnore
     public ArrayList<Vector2d> pointsBeam;
     /**
      * Индекс искомого треугольника
@@ -89,10 +93,6 @@ public class Task {
      * Список точек в пересечении
      */
     private final ArrayList<Vector2d> crossed;
-//    /**
-//     * Список точек в разности
-//     */
-//    private final ArrayList<Point> single;
     /**
      * Порядок разделителя сетки, т.е. раз в сколько отсечек
      * будет нарисована увеличенная
@@ -298,7 +298,7 @@ public class Task {
         if (pointsTriangle.size() < 3) {
             PanelLog.info("точка " + pos + " добавлена");
         } else {
-            Triangle t = new Triangle(pointsTriangle.get(0), pointsTriangle.get(1), pointsTriangle.get(2));
+            Triangle t = new Triangle(new ArrayList<>(List.of(pointsTriangle.get(0), pointsTriangle.get(1), pointsTriangle.get(2))));
             triangles.add(t);
             pointsTriangle.clear();
             PanelLog.info("тругольник " + t.toString() + " добавлен");
@@ -316,7 +316,7 @@ public class Task {
         if (pointsBeam.size() < 2) {
             PanelLog.info("точка " + pos + " добавлена");
         } else {
-            Beam b = new Beam(pointsBeam.get(0), pointsBeam.get(1));
+            Beam b = new Beam(new ArrayList<>(List.of(pointsBeam.get(0), pointsBeam.get(1))));
             beams.add(b);
             pointsBeam.clear();
             PanelLog.info("широкоий луч " + b.toString() + " добавлен");
