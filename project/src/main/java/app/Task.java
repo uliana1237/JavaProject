@@ -427,6 +427,12 @@ public class Task {
         solved = false;
     }
 
+    /**
+     * Получить примерную площадь пересечения треугольника и широкого луча
+     * @param t треугольник
+     * @param b широкий луч
+     * @return примерная площадь
+     */
     private double get_S_OfCross(Triangle t, Beam b) {
         int n = 100000;
         int cnt = 0;
