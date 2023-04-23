@@ -33,18 +33,19 @@ public class Colors {
     /**
      * Цвет кнопки
      */
-    public static final int BUTTON_COLOR = Misc.getColor(80, 0, 0, 0);   /**
-     * Цвет пересечения
-     */
-    public static final int CROSSED_COLOR = Misc.getColor(200, 255, 255, 0);
+    public static final int BUTTON_COLOR = Misc.getColor(80, 0, 0, 0);
     /**
-     * Цвет точек незкончего треугольника
+     * Цвет точек незкончой фигуры
      */
-    public static final int POINTS_TRIANGLE = Misc.getColor(200, 0, 255, 255);
+    public static final int POINTS = Misc.getColor(200, 0, 255, 255);
     /**
-     * Цвет точек незкончего широкого угла
+     * Цвет пересечения широкого угла
      */
-    public static final int POINTS_BEAM = Misc.getColor(255, 166, 0, 0);
+    public static final int CROSSED_BEAM = Misc.getColor(200, 255, 255, 0);
+    /**
+     * Цвет пересечения треугольника
+     */
+    public static final int CROSSED_TRIANGLE = Misc.getColor(255, 166, 0, 0);
     /**
      * Цвет сетки
      */

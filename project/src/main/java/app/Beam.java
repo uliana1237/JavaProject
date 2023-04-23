@@ -20,7 +20,7 @@ public class Beam {
      * @param p1 вершина №1
      * @param p2 вершина №2
      */
-    Beam(Vector2d p1, Vector2d p2) {
+    public Beam(Vector2d p1, Vector2d p2) {
         this.peaks = new ArrayList<Vector2d>(List.of(new Vector2d[]{p1, p2}));
     }
 
@@ -57,6 +57,6 @@ public class Beam {
         Vector2d l = Vector2d.subtract(peaks.get(1), peaks.get(0));
         Vector2d d = Vector2d.subtract(point, peaks.get(0));
         double projection = (l.x * d.x + l.y * d.y) / l.length();
-        return projection > 0 && projection < l.length();
+        return projection > 0 && projection < l.length() && (l.x * d.y - l.y * d.x > 0);
     }
 }

@@ -1,11 +1,9 @@
 package app;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import io.github.humbleui.jwm.MouseButton;
 import io.github.humbleui.skija.*;
+import lombok.Getter;
 import misc.CoordinateSystem2d;
 import misc.CoordinateSystem2i;
 import misc.Vector2d;
@@ -45,6 +43,7 @@ public class Task {
     /**
      * Список треугольников
      */
+    @Getter
     private final ArrayList<Triangle> triangles;
     /**
      * Список точек незаконченного треугольника
@@ -53,11 +52,27 @@ public class Task {
     /**
      * Список широких лучей
      */
+    @Getter
     private final ArrayList<Beam> beams;
     /**
      * Список точек незаконченного широкого луча
      */
     public ArrayList<Vector2d> pointsBeam;
+    /**
+     * Индекс искомого треугольника
+     */
+    @Getter
+    private int indexTriangle;
+    /**
+     * Индекс искомого широкого луча
+     */
+    @Getter
+    private int indexBeam;
+    /**
+     * Искомая площадь
+     */
+    @Getter
+    private double maxS;
     /**
      * Размер точки
      */
@@ -87,17 +102,21 @@ public class Task {
     /**
      * Задача
      *
-     * @param ownCS  СК задачи
-     * @param points массив точек
+     * @param ownCS     СК задачи
+     * @param triangles список треугольников
+     * @param beams     список широких лучей
      */
     @JsonCreator
-    public Task(@JsonProperty("ownCS") CoordinateSystem2d ownCS, @JsonProperty("points") ArrayList<Point> points) {
+    public Task(@JsonProperty("ownCS") CoordinateSystem2d ownCS, @JsonProperty("triangles") ArrayList<Triangle> triangles, @JsonProperty("beams") ArrayList<Beam> beams) {
         this.ownCS = ownCS;
-        this.triangles = new ArrayList<>();
-        this.beams = new ArrayList<>();
+        this.triangles = triangles;
+        this.beams = beams;
         this.crossed = new ArrayList<>();
         this.pointsTriangle = new ArrayList<>();
         this.pointsBeam = new ArrayList<>();
+        this.indexBeam = -1;
+        this.indexTriangle = -1;
+        this.maxS = 0;
 
         // вручную
 //        triangles.add(new Triangle(new Vector2d(0, 0), new Vector2d(3, 0), new Vector2d(0, 3)));
@@ -130,40 +149,37 @@ public class Task {
      */
     private void renderTask(Canvas canvas, CoordinateSystem2i windowCS) {
         canvas.save();
+        int i;
         // создаём перо
         try (var paint = new Paint()) {
             if (!pointsTriangle.isEmpty()) {
-                paint.setColor(POINTS_TRIANGLE);
+                paint.setColor(POINTS);
                 paintPoints(pointsTriangle, paint, windowCS, canvas);
             }
+            i = 0;
             for (Triangle t: triangles) {
-                paint.setColor(Triangle.getColor());
+                if (i == indexTriangle) {
+                    paint.setColor(CROSSED_TRIANGLE);
+                } else {
+                    paint.setColor(Triangle.getColor());
+                }
                 paintLines(t.peaks,true, paint, windowCS, canvas);
+                ++i;
             }
             if (!pointsBeam.isEmpty()) {
-                paint.setColor(POINTS_BEAM);
+                paint.setColor(POINTS);
                 paintPoints(pointsBeam, paint, windowCS, canvas);
             }
+            i = 0;
             for (Beam b: beams) {
-                paint.setColor(Beam.getColor());
-                Vector2d p1, p2, l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
-                Vector2d n = new Vector2d(-l.y, l.x);
-
-                Vector2d m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(0));
-                if (m.x / n.x > m.y / n.y) {
-                    p1 = new Vector2d(m.y / n.y * n.x, m.y);
+                if (i == indexBeam) {
+                    paint.setColor(CROSSED_BEAM);
                 } else {
-                    p1 = new Vector2d(m.x, m.x / n.x * n.y);
+                    paint.setColor(Beam.getColor());
                 }
-                p1.add(b.peaks.get(0));
-
-                m = Vector2d.subtract(ownCS.getMax(), b.peaks.get(1));
-                if (m.x / n.x > m.y / n.y) {
-                    p2 = new Vector2d(m.y / n.y * n.x, m.y);
-                } else {
-                    p2 = new Vector2d(m.x, m.x / n.x * n.y);
-                }
-                p2.add(b.peaks.get(1));
+                Vector2d l = Vector2d.subtract(b.peaks.get(1), b.peaks.get(0));
+                Vector2d p1 = getLimitPoint(b.peaks.get(0), new Vector2d(-l.y, l.x));
+                Vector2d p2 = getLimitPoint(b.peaks.get(1), new Vector2d(-l.y, l.x));
 
                 ArrayList<Vector2d> points = new ArrayList<>();
                 points.add(p1);
@@ -171,14 +187,35 @@ public class Task {
                 points.add(b.peaks.get(1));
                 points.add(p2);
                 paintLines(points, false, paint, windowCS, canvas);
+
+                ++i;
             }
             if (!crossed.isEmpty()) {
-                paint.setColor(CROSSED_COLOR);
+                paint.setColor(POINTS);
                 paintLines(crossed, true, paint, windowCS, canvas);
                 paint.setColor(Beam.getColor());
             }
         }
         canvas.restore();
+    }
+
+    Vector2d getLimitPoint(Vector2d point, Vector2d l) {
+        Vector2d p = new Vector2d(0, 0);
+        if (l.x > 0) {
+            p.x = ownCS.getMax().x;
+        } else if (l.x < 0) {
+            p.x = ownCS.getMin().x;
+        }
+        p.y = point.y + (p.x - point.x) * l.y / l.x;
+        if (p.y > ownCS.getMax().y || p.y < ownCS.getMin().y || l.x == 0) {
+            if (l.y > 0) {
+                p.y = ownCS.getMax().y;
+            } else if (l.y < 0) {
+                p.y = ownCS.getMin().y;
+            }
+            p.x = point.x + (p.y - point.y) * l.x / l.y;
+        }
+        return p;
     }
 
     /**
@@ -212,8 +249,8 @@ public class Task {
     private void paintLine(Vector2d p1, Vector2d p2, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
         // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
         // а в классическом представлении - вверх
-        Vector2i windowPos1 = windowCS.getCoords(p1.x, p1.y, ownCS);
-        Vector2i windowPos2 = windowCS.getCoords(p2.x, p2.y, ownCS);
+        Vector2i windowPos1 = windowCS.getCoords(p1.x, -p1.y, ownCS);
+        Vector2i windowPos2 = windowCS.getCoords(p2.x, -p2.y, ownCS);
         // рисуем точку
         canvas.drawLine(windowPos1.x, windowPos1.y, windowPos2.x, windowPos2.y, paint);
     }
@@ -245,7 +282,7 @@ public class Task {
     private void paintPoint(Vector2d p, Paint paint, CoordinateSystem2i windowCS, Canvas canvas) {
         // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
         // а в классическом представлении - вверх
-        Vector2i windowPos = windowCS.getCoords(p.x, p.y, ownCS);
+        Vector2i windowPos = windowCS.getCoords(p.x, -p.y, ownCS);
         // рисуем точку
         canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
     }
@@ -297,6 +334,7 @@ public class Task {
         if (lastWindowCS == null) return;
         // получаем положение на экране
         Vector2d taskPos = ownCS.getCoords(pos, lastWindowCS);
+        taskPos.y *= -1;
         // если левая кнопка мыши, добавляем треугольник
         if (mouseButton.equals(MouseButton.PRIMARY)) {
             addPointTriangle(taskPos);
@@ -389,34 +427,33 @@ public class Task {
         solved = false;
     }
 
+    private double get_S_OfCross(Triangle t, Beam b) {
+        int n = 100000;
+        int cnt = 0;
+        for (int i = 0; i < n; ++i) {
+            Vector2d pos = ownCS.getRandomCoords();
+            if (t.isInside(pos) && b.isInside(pos)) ++cnt;
+        }
+        return ownCS.getSize().x * ownCS.getSize().y / n * cnt;
+    }
+
     /**
      * Решить задачу
      */
     public void solve() {
-        // очищаем списки
-//        crossed.clear();
-//        single.clear();
-//
-//        // перебираем пары точек
-//        for (int i = 0; i < points.size(); i++) {
-//            for (int j = i + 1; j < points.size(); j++) {
-//                // сохраняем точки
-//                Point a = points.get(i);
-//                Point b = points.get(j);
-//                // если точки совпадают по положению
-//                if (a.pos.equals(b.pos) && !a.pointSet.equals(b.pointSet)) {
-//                    if (!crossed.contains(a)) {
-//                        crossed.add(a);
-//                        crossed.add(b);
-//                    }
-//                }
-//            }
-//        }
-//
-//        /// добавляем вс
-//        for (Point point : points)
-//            if (!crossed.contains(point))
-//                single.add(point);
+        // очищаем предыдущий ответ
+        cancel();
+
+        for (int i = 0; i < triangles.size(); ++i) {
+            for (int j = 0; j < beams.size(); ++j) {
+                double S = get_S_OfCross(triangles.get(i), beams.get(j));
+                if (S > maxS) {
+                    maxS = S;
+                    indexTriangle = i;
+                    indexBeam = j;
+                }
+            }
+        }
 
         // задача решена
         solved = true;
@@ -464,6 +501,9 @@ public class Task {
      * Отмена решения задачи
      */
     public void cancel() {
+        indexBeam = -1;
+        indexTriangle = -1;
+        maxS = 0;
         solved = false;
     }
 

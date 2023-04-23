@@ -101,8 +101,9 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-                PanelRendering.task.addPointTriangle(new Vector2d(xField.doubleValue(), -yField.doubleValue()));
+                PanelRendering.task.addPointTriangle(new Vector2d(xField.doubleValue(), yField.doubleValue()));
                 addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsTriangle.size() + 1);
+                cancelTask();
             }
         });
         buttons.add(addTriangle);
@@ -118,8 +119,9 @@ public class PanelControl extends GridPanel {
             } else if (!yField.hasValidDoubleValue())
                 PanelLog.warning("Y координата введена неверно");
             else {
-                PanelRendering.task.addPointBeam(new Vector2d(xField.doubleValue(), -yField.doubleValue()));
+                PanelRendering.task.addPointBeam(new Vector2d(xField.doubleValue(), yField.doubleValue()));
                 addTriangle.text = String.format("Добавить точку №%d\nв треугольник", PanelRendering.task.pointsBeam.size() + 1);
+                cancelTask();
             }
         });
         buttons.add(addBeam);
@@ -144,6 +146,7 @@ public class PanelControl extends GridPanel {
                 PanelLog.warning("кол-во точек указано неверно");
             } else {
                 PanelRendering.task.addRandomTriangles(cntField.intValue());
+                cancelTask();
             }
         });
         buttons.add(addRandomTriangles);
@@ -158,6 +161,7 @@ public class PanelControl extends GridPanel {
                 PanelLog.warning("кол-во точек указано неверно");
             } else {
                 PanelRendering.task.addRandomBeams(cntField.intValue());
+                cancelTask();
             }
         });
         buttons.add(addRandomBeam);
@@ -184,28 +188,32 @@ public class PanelControl extends GridPanel {
                 window, false, backgroundColor, PANEL_PADDING,
                 6, 8, 0, 7, 3, 1, "Очистить",
                 true, true);
-        clear.setOnClick(() -> PanelRendering.task.clear());
+        clear.setOnClick(() -> {
+            PanelRendering.task.clear();
+            cancelTask();
+        });
         buttons.add(clear);
 
         solve = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
                 6, 8, 3, 7, 3, 1, "Решить",
                 true, true);
-//        solve.setOnClick(() -> {
-//            if (!PanelRendering.task.isSolved()) {
-//                PanelRendering.task.solve();
-//                String s = "Задача решена\n" +
-//                        "Пересечений: " + PanelRendering.task.getCrossed().size() / 2 + "\n" +
-//                        "Отдельных точек: " + PanelRendering.task.getSingle().size();
-//
-//                PanelInfo.show(s + "\n\nНажмите Esc, чтобы вернуться");
-//                PanelLog.success(s);
-//                solve.text = "Сбросить";
-//            } else {
-//                cancelTask();
-//            }
-//            window.requestFrame();
-//        });
+        solve.setOnClick(() -> {
+            if (!PanelRendering.task.isSolved()) {
+                PanelRendering.task.solve();
+                String s = "Задача решена\n" +
+                        "Треугльник: " + PanelRendering.task.getTriangles().get(PanelRendering.task.getIndexTriangle()) + "\n" +
+                        "Широкий луч: " + PanelRendering.task.getBeams().get(PanelRendering.task.getIndexBeam()) + "\n" +
+                        "Площадь: " + PanelRendering.task.getMaxS();
+
+                PanelInfo.show(s + "\n\nНажмите Esc, чтобы вернуться");
+                PanelLog.success(s);
+                solve.text = "Сбросить";
+            } else {
+                cancelTask();
+            }
+            window.requestFrame();
+        });
         buttons.add(solve);
     }
 

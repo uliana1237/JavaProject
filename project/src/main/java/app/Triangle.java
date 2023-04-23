@@ -27,7 +27,7 @@ public class Triangle {
      * @param p2 вершина №2
      * @param p3 вершина №3
      */
-    Triangle(Vector2d p1, Vector2d p2, Vector2d p3) {
+    public Triangle(Vector2d p1, Vector2d p2, Vector2d p3) {
         this.peaks = new ArrayList<Vector2d>(List.of(new Vector2d[]{p1, p2, p3}));
         Vector2d v1 = Vector2d.subtract(p2, p1);
         Vector2d v2 = Vector2d.subtract(p3, p1);
